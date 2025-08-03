@@ -2,21 +2,81 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { StreaksService } from './streaks.service';
 import * as dayjs from 'dayjs';
 import { DayResult } from './dto/streak-response.dto';
+import { NotFoundException } from "@nestjs/common";
 
 describe('StreaksService', () => {
   let service: StreaksService;
 
-  beforeAll(async () => {
+  const getDay = (daysAgo: number): string => {
+    return dayjs().subtract(daysAgo, 'day').format('YYYY-MM-DD');
+  };
+
+  const generateCaseData = (caseId: number): { date: string; activities: number }[] => {
+    const today = dayjs().startOf('day');
+
+    if (caseId === 1) {
+      return [
+        { date: today.subtract(3, 'day').format('YYYY-MM-DD'), activities: 1 },
+        { date: today.format('YYYY-MM-DD'), activities: 3 },
+      ];
+    }
+
+    if (caseId === 2) {
+      return [
+        { date: today.subtract(4, 'day').format('YYYY-MM-DD'), activities: 1 },
+        { date: today.subtract(3, 'day').format('YYYY-MM-DD'), activities: 1 },
+        { date: today.format('YYYY-MM-DD'), activities: 1 },
+      ];
+    }
+
+    if (caseId === 3) {
+      return [
+        { date: today.subtract(4, 'day').format('YYYY-MM-DD'), activities: 1 },
+        { date: today.subtract(1, 'day').format('YYYY-MM-DD'), activities: 3 },
+      ];
+    }
+
+    if (caseId === 4) {
+      return [
+        { date: today.subtract(2, 'day').format('YYYY-MM-DD'), activities: 1 },
+      ];
+    }
+
+    if (caseId === 5) {
+      return [
+        { date: today.subtract(6, 'day').format('YYYY-MM-DD'), activities: 0 },
+        { date: today.subtract(5, 'day').format('YYYY-MM-DD'), activities: 0 },
+        { date: today.subtract(4, 'day').format('YYYY-MM-DD'), activities: 1 },
+      ];
+    }
+
+    if (caseId === 6) {
+      return [
+        { date: today.subtract(3, 'day').format('YYYY-MM-DD'), activities: 3 },
+        { date: today.subtract(6, 'day').format('YYYY-MM-DD'), activities: 1 },
+      ];
+    }
+
+    if (caseId === 7) {
+      return [
+        { date: today.add(1, 'day').format('YYYY-MM-DD'), activities: 10 },
+      ];
+    }
+
+    throw new NotFoundException(`Case with ID ${caseId} not found`);
+  };
+
+  beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [StreaksService],
     }).compile();
 
     service = module.get<StreaksService>(StreaksService);
-  });
 
-  const getDay = (daysAgo: number): string => {
-    return dayjs().subtract(daysAgo, 'day').format('YYYY-MM-DD');
-  };
+    jest
+      .spyOn(service as any, 'getCaseData')
+      .mockImplementation((caseId: number) => generateCaseData(caseId));
+  });
 
   it('case 1 — 3-day recovery success (SAVED expected)', async () => {
     const result = await service.getStreakData(1);

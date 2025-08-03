@@ -1,0 +1,15 @@
+{
+  "1": [
+    { "daysAgo": 3, "activities": 1 },
+    { "daysAgo": 0, "activities": 3 }
+  ],
+  "2": [
+    { "daysAgo": 4, "activities": 1 },
+    { "daysAgo": 3, "activities": 1 },
+    { "daysAgo": 0, "activities": 1 }
+  ],
+  "3": [
+    { "daysAgo": 4, "activities": 1 },
+    { "daysAgo": 1, "activities": 3 }
+  ]
+}
