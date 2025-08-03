@@ -1,68 +1,28 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { StreakResponseDto, DayResult } from './dto/streak-response.dto';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
+import * as data from './activity-data.json';
 
 @Injectable()
 export class StreaksService {
-  // Mocked answer data from DB
-  private generateCaseData(caseId: number): { date: string; activities: number }[] {
+  private getCaseData(caseId: number): { date: string; activities: number }[] {
+    const caseKey = caseId.toString();
     const today = dayjs().startOf('day');
 
-    if (caseId === 1) {
-      return [
-        { date: today.subtract(3, 'day').format('YYYY-MM-DD'), activities: 1 },
-        { date: today.format('YYYY-MM-DD'), activities: 3 },
-      ];
+    const relativeEntries = (data as Record<string, { daysAgo: number; activities: number }[]>)[caseKey];
+
+    if (!relativeEntries) {
+      throw new NotFoundException(`Case ${caseId} not found`);
     }
 
-    if (caseId === 2) {
-      return [
-        { date: today.subtract(4, 'day').format('YYYY-MM-DD'), activities: 1 },
-        { date: today.subtract(3, 'day').format('YYYY-MM-DD'), activities: 1 },
-        { date: today.format('YYYY-MM-DD'), activities: 1 },
-      ];
-    }
-
-    if (caseId === 3) {
-      return [
-        { date: today.subtract(4, 'day').format('YYYY-MM-DD'), activities: 1 },
-        { date: today.subtract(1, 'day').format('YYYY-MM-DD'), activities: 3 },
-      ];
-    }
-
-    if (caseId === 4) {
-      return [
-        { date: today.subtract(2, 'day').format('YYYY-MM-DD'), activities: 1 },
-      ];
-    }
-
-    if (caseId === 5) {
-      return [
-        { date: today.subtract(6, 'day').format('YYYY-MM-DD'), activities: 0 },
-        { date: today.subtract(5, 'day').format('YYYY-MM-DD'), activities: 0 },
-        { date: today.subtract(4, 'day').format('YYYY-MM-DD'), activities: 1 },
-      ];
-    }
-
-    if (caseId === 6) {
-      return [
-        { date: today.subtract(3, 'day').format('YYYY-MM-DD'), activities: 3 },
-        { date: today.subtract(6, 'day').format('YYYY-MM-DD'), activities: 1 },
-      ];
-    }
-
-    if (caseId === 7) {
-      return [
-        { date: today.add(1, 'day').format('YYYY-MM-DD'), activities: 10 },
-      ];
-    }
-
-
-    throw new NotFoundException(`Case with ID ${caseId} not found`);
+    return relativeEntries.map(({ daysAgo, activities }) => ({
+      date: today.subtract(daysAgo, 'day').format('YYYY-MM-DD'),
+      activities,
+    }));
   }
 
   async getStreakData(caseId: number): Promise<StreakResponseDto> {
-    const rawActivities = this.generateCaseData(caseId);
+    const rawActivities = this.getCaseData(caseId);
 
     const today = dayjs().startOf('day');
     const lookup = new Map<string, number>();
