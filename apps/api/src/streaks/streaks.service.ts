@@ -9,7 +9,9 @@ export class StreaksService {
     const caseKey = caseId.toString();
     const today = dayjs().startOf('day');
 
-    const relativeEntries = (data as Record<string, { daysAgo: number; activities: number }[]>)[caseKey];
+    const relativeEntries = (
+      data as Record<string, { daysAgo: number; activities: number }[]>
+    )[caseKey];
 
     if (!relativeEntries) {
       throw new NotFoundException(`Case ${caseId} not found`);
@@ -21,7 +23,7 @@ export class StreaksService {
     }));
   }
 
-  async getStreakData(caseId: number): Promise<StreakResponseDto> {
+  getStreakData(caseId: number): StreakResponseDto {
     const rawActivities = this.getCaseData(caseId);
 
     const today = dayjs().startOf('day');
@@ -95,7 +97,7 @@ export class StreaksService {
       }
     }
 
-    const todayEntry = days.find(d => d.date === today.format('YYYY-MM-DD'));
+    const todayEntry = days.find((d) => d.date === today.format('YYYY-MM-DD'));
     return {
       activitiesToday: todayEntry?.activities || 0,
       total,
