@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+
+  backend:
+    build: ./apps/api
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./apps/api:/app
+      - /app/node_modules
+    command: yarn start:dev
+
+  frontend:
+    build: ./apps/web
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: yarn dev --host
+    depends_on:
+        - backend
