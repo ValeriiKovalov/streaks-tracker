@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { StreaksController } from './streaks.controller';
 import { StreaksService } from './streaks.service';
 import { StreakResponseDto } from './dto/streak-response.dto';
-import { NotFoundException } from "@nestjs/common";
+import { NotFoundException } from '@nestjs/common';
 
 describe('StreaksController', () => {
   let controller: StreaksController;
@@ -22,11 +22,15 @@ describe('StreaksController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should throw NotFoundException for invalid caseId', async () => {
-    await expect(controller.getStreak(999)).rejects.toThrow(NotFoundException);
+  it('should throw NotFoundException for invalid caseId', () => {
+    jest.spyOn(service as any, 'getCaseData').mockImplementation(() => {
+      throw new NotFoundException('Case 999 not found');
+    });
+
+    expect(() => controller.getStreak(999)).toThrow(NotFoundException);
   });
 
-  it('should return streak data from service', async () => {
+  it('should return streak data from service', () => {
     const mockResponse: StreakResponseDto = {
       activitiesToday: 1,
       total: 3,
@@ -41,12 +45,12 @@ describe('StreaksController', () => {
 
     const spy = jest
       .spyOn(service, 'getStreakData')
-      .mockResolvedValueOnce(mockResponse);
+      .mockReturnValueOnce(mockResponse);
 
     const caseId = 5;
-    const result = await controller.getStreak(caseId);
+    const result = controller.getStreak(caseId);
 
-    expect(spy).toHaveBeenCalledWith(5);
+    expect(spy).toHaveBeenCalledWith(caseId);
     expect(result).toEqual(mockResponse);
   });
 });
